@@ -18,7 +18,7 @@ export async function uploadWasteImage(
     const fileName = `${userId}/${Date.now()}.${fileExt}`
     
     // Upload to Supabase storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(fileName, file, {
         cacheControl: '3600',
