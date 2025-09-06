@@ -1,10 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import { FaUser, FaStore, FaTrophy, FaCalendarAlt, FaUsers, FaHome } from "react-icons/fa";
+import { FaUser, FaStore, FaTrophy, FaCalendarAlt, FaUsers, FaHome, FaSearch } from "react-icons/fa";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: FaHome },
-  { href: "/profile", label: "Profile", icon: FaUser },
+  { href: "/dashboard/profile", label: "Profile", icon: FaUser },
+  { href: "/dashboard/profile/waste-analyzer", label: "Waste Analyzer", icon: FaSearch },
   { href: "/marketplace", label: "Marketplace", icon: FaStore },
   { href: "/leaderboard", label: "Leaderboard", icon: FaTrophy },
   { href: "/events", label: "Events", icon: FaCalendarAlt },

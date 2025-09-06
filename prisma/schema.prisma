@@ -73,19 +73,23 @@ model Event {
 // Add these models to your existing schema.prisma
 
 model WasteAnalysis {
-  id          String   @id @default(cuid())
-  imageUrl    String   // URL to the uploaded waste image
-  imageName   String   // Original filename
-  status      String   @default("processing") // processing, completed, failed
-  createdAt   DateTime @default(now())
-  completedAt DateTime?
+  id              String   @id @default(cuid())
+  imageUrl        String   // Supabase storage URL
+  imageName       String   // Original filename
+  imageSize       Int      // File size in bytes
+  mimeType        String   // Image MIME type
+  status          String   @default("processing") // processing, completed, failed
+  errorMessage    String?  // Error details if failed
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?
   
-  // Analysis Results
-  detectedItems    DetectedWasteItem[]
-  lifecycleInfo    Json?     // Lifecycle data as JSON
-  recyclingOptions Json?     // Recycling suggestions as JSON
-  reuseIdeas       Json?     // Reuse suggestions as JSON
-  confidence       Float?    // AI confidence score
+  // Gemini Analysis Results
+  rawGeminiResponse Json?  // Full Gemini response
+  detectedItems     DetectedWasteItem[]
+  lifecycleInfo     Json?  // Lifecycle data
+  recyclingOptions  Json?  // Recycling suggestions
+  reuseIdeas        Json?  // Reuse suggestions
+  confidence        Float? // Overall confidence score
   
   // Relations
   user      User   @relation(fields: [userId], references: [id])
@@ -97,8 +101,9 @@ model DetectedWasteItem {
   name        String   // e.g., "Plastic Bottle", "Cardboard Box"
   category    String   // e.g., "Plastic", "Paper", "Metal", "Glass"
   material    String?  // e.g., "PET", "HDPE", "Aluminum"
-  confidence  Float    // AI confidence score (0-1)
+  confidence  Float    // Gemini confidence score (0-1)
   boundingBox Json?    // Image coordinates for detected item
+  description String?  // Gemini's description of the item
   
   // Relations
   analysis   WasteAnalysis @relation(fields: [analysisId], references: [id])
