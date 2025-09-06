@@ -28,34 +28,37 @@ export interface WasteAnalysisResult {
   analysisNotes: string
 }
 
-export async function analyzeWasteImage(imageUrl: string): Promise<WasteAnalysisResult> {
+export async function analyzeWasteImage(imageData: string): Promise<WasteAnalysisResult> {
   try {
-    console.log('Starting waste analysis for image:', imageUrl)
+    console.log('Starting waste analysis for image data')
     
-    // Convert image URL to base64 or use direct URL
-    const imageData = await fetchImageAsBase64(imageUrl)
+    // Extract base64 data if it's a data URL
+    const base64Data = imageData.includes(',') ? imageData.split(',')[1] : imageData
     
     const result = await visionModel.generateContent([
       WASTE_ANALYSIS_PROMPT,
       {
         inlineData: {
-          data: imageData,
+          data: base64Data,
           mimeType: 'image/jpeg'
         }
       }
     ])
 
     const response = await result.response
-    const text = response.text()
-    
-    console.log('Gemini response:', text)
-    
+    const text = response.text();
+
+    // Remove Markdown code fences if present
+    const cleanedText = text.replace(/```json|```/g, "").trim();
+
+    console.log('Gemini response:', cleanedText);
+
     // Parse JSON response
-    const analysisResult = JSON.parse(text) as WasteAnalysisResult
-    
+    const analysisResult = JSON.parse(cleanedText) as WasteAnalysisResult;
+
     // Validate the response structure
     if (!analysisResult.detectedItems || !Array.isArray(analysisResult.detectedItems)) {
-      throw new Error('Invalid response structure from Gemini')
+      throw new Error('Invalid response structure from Gemini');
     }
     
     return analysisResult
@@ -68,23 +71,6 @@ export async function analyzeWasteImage(imageUrl: string): Promise<WasteAnalysis
       overallConfidence: 0,
       analysisNotes: `Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`
     }
-  }
-}
-
-async function fetchImageAsBase64(imageUrl: string): Promise<string> {
-  try {
-    const response = await fetch(imageUrl)
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.statusText}`)
-    }
-    
-    const arrayBuffer = await response.arrayBuffer()
-    const base64 = Buffer.from(arrayBuffer).toString('base64')
-    
-    return base64
-  } catch (error) {
-    console.error('Error fetching image:', error)
-    throw new Error('Failed to process image for analysis')
   }
 }
 

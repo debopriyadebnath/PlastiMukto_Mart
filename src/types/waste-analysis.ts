@@ -26,6 +26,10 @@ export interface DetectedWasteItem {
   boundingBox?: any
   description?: string
   analysisId: string
+  // Additional fields for analysis results
+  lifecycleInfo?: LifecycleInfo
+  recyclingOptions?: RecyclingOptions
+  reuseIdeas?: string[]
 }
 
 export interface WasteProduct {
@@ -66,6 +70,23 @@ export interface ReuseIdeas {
   timeRequired?: string
 }
 
+// Simple type for direct analysis results
+export interface DirectAnalysisResult {
+  detectedItems: any[]
+  lifecycleInfo: any[]
+  recyclingOptions: any[]
+  reuseIdeas: any[]
+  confidence: number
+  analysisNotes?: string
+}
+
+export interface ImageInfo {
+  fileName: string
+  fileSize: number
+  mimeType: string
+  imageData?: string // base64 data for saving
+}
+
 export interface AnalysisUploadRequest {
   image: File
   userId: string
@@ -86,6 +107,28 @@ export interface AnalysisResult {
 export interface AnalysisHistoryResponse {
   success: boolean
   analyses?: WasteAnalysis[]
+  error?: string
+}
+
+export interface DirectAnalysisResponse {
+  success: boolean
+  analysis?: DirectAnalysisResult
+  imageInfo?: ImageInfo
+  error?: string
+}
+
+export interface SaveAnalysisRequest {
+  imageData: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+  analysis: DirectAnalysisResult
+}
+
+export interface SaveAnalysisResponse {
+  success: boolean
+  analysisId?: string
+  pointsAwarded?: number
   error?: string
 }
 
