@@ -26,126 +26,168 @@ export default function Dashboard() {
     return null;
   }
 
+  // ...existing code for auth and loading...
+
+  // New Eco-Tech Dashboard UI (with user data)
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
-                Green Marketplace Dashboard
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-700">
-                Welcome, {user.name}!
-              </div>
-              <div className="text-sm text-green-600 font-medium">
-                {user.points} points
-              </div>
-              <button
-                onClick={logout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen flex flex-col bg-black">
+      {/* Header */}
+      <header className="w-full flex items-center justify-between bg-black shadow-sm px-8 py-4 mb-6">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="PlastiMukti Mart Logo" width={40} height={40} className="rounded-full border-2 border-green-500" />
+          <span className="flex flex-col">
+            <span className="text-xl font-bold text-green-500">PlastiMukto Mart</span>
+            <span className="text-xs text-orange-400 font-semibold tracking-wide">(plastic free marketplace)</span>
+          </span>
         </div>
-      </nav>
+        <div className="flex items-center gap-4">
+          <span className="text-orange-500 font-semibold"></span>
+          <span className="text-green-400 font-semibold">{user && user.name ? `Welcome, ${user.name}!` : ''}</span>
+          <span className="text-orange-400 font-semibold">{user && user.points ? `${user.points} pts` : ''}</span>
+          <button onClick={logout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">Logout</button>
+        </div>
+      </header>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <aside className="w-64 bg-black shadow-lg flex flex-col items-center py-8 px-4 rounded-tr-3xl rounded-br-3xl border-r-2 border-orange-500">
+          <div className="flex items-center gap-3 ">
+            
+            <span className="text-2xl font-bold text-green-500"></span>
+          </div>
+          <nav className="flex flex-col gap-4 w-full">
+            <button onClick={() => router.push('/dashboard/home')} className="flex items-center gap-3 px-4 py-3 rounded-lg text-orange-500 font-semibold hover:bg-orange-900 hover:text-white transition"><span className="text-orange-500">🏠</span>Home</button>
+            <button onClick={() => router.push('/dashboard/rewards')} className="flex items-center gap-3 px-4 py-3 rounded-lg text-orange-500 font-semibold hover:bg-orange-900 hover:text-white transition"><span className="text-orange-500">🎁</span>Rewards</button>
+            <button onClick={() => router.push('/dashboard/community')} className="flex items-center gap-3 px-4 py-3 rounded-lg text-orange-500 font-semibold hover:bg-orange-900 hover:text-white transition"><span className="text-orange-500">👥</span>Community Hub</button>
+            <button onClick={() => router.push('/dashboard/marketplace')} className="flex items-center gap-3 px-4 py-3 rounded-lg text-green-500 font-semibold hover:bg-orange-900 hover:text-white transition"><span className="text-green-500">🛒</span>Marketplace</button>
+            <button onClick={() => router.push('/dashboard/vendors')} className="flex items-center gap-3 px-4 py-3 rounded-lg text-green-500 font-semibold hover:bg-orange-900 hover:text-white transition"><span className="text-green-500">🏪</span>Connect Vendors</button>
+            <button onClick={() => router.push('/dashboard/gesture')} className="flex items-center gap-3 px-4 py-3 rounded-lg text-orange-500 font-semibold hover:bg-orange-900 hover:text-white transition"><span className="text-orange-500">🤳</span>Gesture Control</button>
+            <button onClick={() => router.push('/dashboard/profile')} className="flex items-center gap-3 px-4 py-3 rounded-lg text-orange-500 font-semibold hover:bg-orange-900 hover:text-white transition"><span className="text-orange-500">👤</span>Profile</button>
+          </nav>
+          <span className="flex flex-col mt-10">
+            <span className="text-2xl font-bold text-green-500">PlastiMukti Mart</span>
+            <span className="text-xs text-orange-400 font-semibold tracking-wide">(plastic free marketplace)</span>
+          </span>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-8 flex flex-col gap-8 bg-black">
+          {/* Welcome */}
+          <div className="bg-orange-900 rounded-2xl shadow p-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-1">Welcome back, Eco Hero!</h1>
+              <p className="text-orange-200">Let’s make a difference today. Track your impact and earn rewards!</p>
+            </div>
+            <span className="text-3xl text-green-500 bg-black rounded-full p-2">🤳</span>
+          </div>
+          {/* Impact Stats & Leaderboard */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* User Stats */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">👤</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Your Points
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {user.points}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
+            <div className="bg-black rounded-2xl shadow p-6 flex flex-col items-center border border-orange-900">
+              <span className="text-3xl font-bold text-orange-400 mb-1">{user.points || '1,200,000+'}</span>
+              <span className="text-green-500">Plastics Recycled</span>
             </div>
-
-            {/* Rank */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">🏆</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Your Rank
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {user.rank ? `#${user.rank}` : 'Unranked'}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
+            <div className="bg-black rounded-2xl shadow p-6 flex flex-col items-center border border-orange-900">
+              <span className="text-2xl text-green-500 mb-1">🏆</span>
+              <span className="text-lg font-semibold text-orange-400">Leaderboard</span>
+              <ul className="mt-2 text-orange-200 text-sm">
+                <li>1. Priya D. — <span className="font-bold text-orange-400">12,500</span> pts</li>
+                <li>2. Rahul S. — <span className="font-bold text-orange-400">11,800</span> pts</li>
+                <li>3. Asha K. — <span className="font-bold text-orange-400">10,950</span> pts</li>
+              </ul>
             </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">⚡</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Quick Actions
-                      </dt>
-                      <dd className="text-sm text-gray-900">
-                        <button className="text-green-600 hover:text-green-500">
-                          View Bounties
-                        </button>
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
+            <div className="bg-black rounded-2xl shadow p-6 flex flex-col items-center border border-orange-900">
+              <span className="text-2xl text-orange-400 mb-1">🎁</span>
+              <span className="text-lg font-semibold text-orange-400">Rewards</span>
+              <div className="flex gap-2 mt-2">
+                <span className="bg-orange-900 text-orange-200 px-3 py-1 rounded-full text-xs font-semibold">Eco Badge</span>
+                <span className="bg-green-500 text-black px-3 py-1 rounded-full text-xs font-semibold">Tokens</span>
               </div>
             </div>
           </div>
-
-          {/* Welcome Message */}
-          <div className="mt-8 bg-white shadow rounded-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Welcome to the Green Revolution!
-            </h2>
-            <p className="text-gray-600 mb-4">
-              You are now part of our waste management community. Start earning points by:
-            </p>
-            <ul className="list-disc list-inside text-gray-600 space-y-2">
-              <li>Completing waste management bounties</li>
-              <li>Participating in local cleanup events</li>
-              <li>Selling eco-friendly items in the marketplace</li>
-              <li>Sharing your green initiatives</li>
-            </ul>
+          {/* Community Hub & Marketplace */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-black rounded-2xl shadow p-6 border border-orange-900">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl text-green-500">🗺️</span>
+                <span className="text-lg font-bold text-orange-400">Nearby NGO Drives</span>
+              </div>
+              <ul className="text-orange-200 text-sm mt-2">
+                <li>GreenEarth Collection — 2.1 km away</li>
+                <li>CleanFuture Drive — 3.4 km away</li>
+                <li>EcoCSR Event — 5.0 km away</li>
+              </ul>
+            </div>
+            <div className="bg-black rounded-2xl shadow p-6 border border-orange-900">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl text-orange-400">🛒</span>
+                <span className="text-lg font-bold text-orange-400">Eco Marketplace</span>
+              </div>
+              <ul className="text-orange-200 text-sm mt-2">
+                <li>Bamboo Toothbrush — 50 tokens</li>
+                <li>Reusable Bag — 30 tokens</li>
+                <li>Plantable Pencils — 20 tokens</li>
+              </ul>
+            </div>
           </div>
-        </div>
-      </main>
+          {/* Profile Card */}
+          <div className="flex justify-end">
+            <div className="bg-black rounded-2xl shadow p-6 flex items-center gap-4 w-full max-w-xs border border-orange-900">
+              <img src="/profile.jpg" alt="Profile" width={56} height={56} className="rounded-full border-4 border-green-500" />
+              <div>
+                <span className="block text-lg font-bold text-green-500">{user.name || 'Priya D.'}</span>
+                <span className="block text-orange-200 text-sm">Eco Champion</span>
+              </div>
+              <span className="text-2xl text-orange-400 ml-auto">👤</span>
+            </div>
+          </div>
+
+          {/* Marketplace Section */}
+          <section className="bg-black rounded-2xl shadow p-6 border border-orange-900 mt-8">
+            <h2 className="text-xl font-bold text-orange-400 mb-4">Marketplace</h2>
+            <p className="text-orange-200 mb-2">Browse and purchase eco-friendly products from verified vendors.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="bg-orange-900 rounded-xl p-4 flex flex-col items-center">
+                <span className="text-green-500 font-bold">Bamboo Toothbrush</span>
+                <span className="text-orange-200 text-sm">50 tokens</span>
+              </div>
+              <div className="bg-orange-900 rounded-xl p-4 flex flex-col items-center">
+                <span className="text-green-500 font-bold">Reusable Bag</span>
+                <span className="text-orange-200 text-sm">30 tokens</span>
+              </div>
+              <div className="bg-orange-900 rounded-xl p-4 flex flex-col items-center">
+                <span className="text-green-500 font-bold">Plantable Pencils</span>
+                <span className="text-orange-200 text-sm">20 tokens</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Connect Vendors Section */}
+          <section className="bg-black rounded-2xl shadow p-6 border border-orange-900 mt-8">
+            <h2 className="text-xl font-bold text-green-500 mb-4">Connect Vendors</h2>
+            <p className="text-orange-200 mb-2">Partner with local eco-vendors to expand your sustainable impact.</p>
+            <div className="flex flex-wrap gap-4">
+              <div className="bg-orange-900 rounded-xl p-4 flex flex-col items-center min-w-[160px]">
+                <span className="text-green-500 font-bold">EcoMart</span>
+                <span className="text-orange-200 text-sm">Organic & Recycled Goods</span>
+              </div>
+              <div className="bg-orange-900 rounded-xl p-4 flex flex-col items-center min-w-[160px]">
+                <span className="text-green-500 font-bold">GreenVendors</span>
+                <span className="text-orange-200 text-sm">Local Sustainable Brands</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Gesture Control Section */}
+          <section className="bg-black rounded-2xl shadow p-6 border border-orange-900 mt-8">
+            <h2 className="text-xl font-bold text-orange-400 mb-4">Gesture Control</h2>
+            <p className="text-orange-200 mb-2">Control dashboard features with hand gestures (coming soon!).</p>
+            <div className="flex items-center gap-4">
+              <span className="text-3xl text-green-500 bg-black rounded-full p-2">🤳</span>
+              <span className="text-orange-200">Enable your camera to use gesture controls for a futuristic experience.</span>
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   );
 }
