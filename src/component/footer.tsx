@@ -5,7 +5,10 @@ export default function Footer() {
     <footer className="bg-orange-100 text-orange-900 py-8 mt-12 border-t border-orange-200">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-bold text-orange-700">WastWise</span>
+            <span className="flex items-center gap-2">
+              <img src="/logo.png" alt="PlastiMukto Mart Logo" className="w-8 h-8 rounded-full border-2 border-green-500" />
+              <span className="text-2xl font-bold text-orange-700">WastWise</span>
+            </span>
           <span className="text-sm text-orange-600">© {new Date().getFullYear()} All rights reserved.</span>
         </div>
         <nav className="flex gap-6 text-sm font-medium">

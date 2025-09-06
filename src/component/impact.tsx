@@ -23,7 +23,7 @@ export default function ImpactSection() {
       </div>
       <div className="max-w-2xl mx-auto text-center">
         <blockquote className="italic text-lg text-gray-700 border-l-4 border-orange-400 pl-4 mb-4">
-          “WasteWise helped our community recycle more than ever before. The leaderboards and rewards keep us motivated!”
+          “PlastiMukto Mart helped our community recycle more than ever before. The leaderboards and rewards keep us motivated!”
         </blockquote>
         <span className="block text-gray-500">— Community Member</span>
       </div>
