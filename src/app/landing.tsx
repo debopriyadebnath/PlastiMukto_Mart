@@ -1,5 +1,12 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
+
+import FeatureSection from '../component/feature';
+import ImpactSection from '../component/impact';
+
+import Footer from '../component/footer';
+import BusinessSection from '@/component/business';
 
 export default function LandingPage() {
   return (
@@ -46,6 +53,16 @@ export default function LandingPage() {
           <Image src="/landingimg.png" alt="Waste Management Illustration" width={420} height={320} />
         </div>
       </section>
+
+  {/* Feature Section */}
+  <FeatureSection />
+
+  {/* Impact Section */}
+  <ImpactSection />
+
+  {/* Business & Partnerships Section */}
+  <BusinessSection />
+      <Footer />
     </div>
   );
 }
