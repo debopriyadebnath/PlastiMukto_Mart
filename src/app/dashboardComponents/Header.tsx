@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { CoinsIcon } from 'lucide-react';
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -17,6 +18,7 @@ const Header = () => {
       <div className="flex items-center gap-4">
         <span className="text-terracotta font-semibold"></span>
         <span className="text-olive font-semibold">{user && user.name ? `Welcome, ${user.name}!` : ''}</span>
+        <CoinsIcon className="text-terracotta" />
         <span className="text-terracotta font-semibold">{user && user.points ? `${user.points} pts` : ''}</span>
         <button 
           onClick={logout} 

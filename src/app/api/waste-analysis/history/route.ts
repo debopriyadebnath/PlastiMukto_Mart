@@ -1,90 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTokenFromRequest, verifyToken } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { getTokenFromRequest, verifyToken } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Getting analysis history')
-    
-    // Verify authentication
     const token = getTokenFromRequest(request)
-    if (!token) {
-      return NextResponse.json(
-        { message: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
-    const payload = verifyToken(token)
+    const payload = token && verifyToken(token)
     if (!payload) {
       return NextResponse.json(
-        { message: 'Invalid token' },
+        { success: false, message: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Get query parameters
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const status = searchParams.get('status')
-
-    // Build where clause
-    const whereClause: any = {
-      userId: payload.id
-    }
-
-    if (status && ['processing', 'completed', 'failed'].includes(status)) {
-      whereClause.status = status
-    }
-
-    // Get analyses with pagination
-    const [analyses, totalCount] = await Promise.all([
-      prisma.wasteAnalysis.findMany({
-        where: whereClause,
-        include: {
-          detectedItems: {
-            select: {
-              id: true,
-              name: true,
-              category: true,
-              confidence: true
-            }
-          }
-        },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        skip: (page - 1) * limit,
-        take: limit
-      }),
-      prisma.wasteAnalysis.count({
-        where: whereClause
-      })
-    ])
-
-    // Calculate pagination info
-    const totalPages = Math.ceil(totalCount / limit)
-    const hasNextPage = page < totalPages
-    const hasPrevPage = page > 1
-
-    return NextResponse.json({
-      success: true,
-      analyses,
-      pagination: {
-        page,
-        limit,
-        totalCount,
-        totalPages,
-        hasNextPage,
-        hasPrevPage
+    const analyses = await prisma.wasteAnalysis.findMany({
+      where: { userId: payload.id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        detectedItems: { select: { id: true, name: true, category: true } } as any
       }
     })
 
-  } catch (error) {
-    console.error('Get history error:', error)
+    return NextResponse.json({ success: true, analyses })
+  } catch (e) {
+    console.error('GET /api/waste-analysis/history error:', e)
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { success: false, message: 'Failed to fetch analyses' },
       { status: 500 }
     )
   }
