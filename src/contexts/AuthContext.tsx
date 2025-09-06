@@ -34,14 +34,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/auth/me', {
+      console.log('Checking authentication...');
+      const response = await fetch('/api/auth/me', {
         credentials: 'include',
       });
 
+      console.log('Auth check response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('User authenticated:', data.user?.name);
         setUser(data.user);
       } else {
+        console.log('User not authenticated');
         setUser(null);
       }
     } catch (error) {
@@ -54,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      const response = await fetch('/auth/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch('/auth/logout', {
+      await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });

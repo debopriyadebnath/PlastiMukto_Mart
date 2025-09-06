@@ -4,9 +4,13 @@ import { getTokenFromRequest, verifyToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('Auth/me request received');
+    
     const token = getTokenFromRequest(request);
+    console.log('Token found:', !!token);
 
     if (!token) {
+      console.log('No token provided');
       return NextResponse.json(
         { message: 'No token provided' },
         { status: 401 }
@@ -14,8 +18,10 @@ export async function GET(request: NextRequest) {
     }
 
     const payload = verifyToken(token);
+    console.log('Token payload:', payload ? 'Valid' : 'Invalid');
 
     if (!payload) {
+      console.log('Invalid token');
       return NextResponse.json(
         { message: 'Invalid token' },
         { status: 401 }
@@ -23,6 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get fresh user data from database
+    console.log('Fetching user data for ID:', payload.id);
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
       select: {
@@ -37,12 +44,14 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
+      console.log('User not found in database');
       return NextResponse.json(
         { message: 'User not found' },
         { status: 404 }
       );
     }
 
+    console.log('User data retrieved successfully');
     return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
     console.error('Get user error:', error);

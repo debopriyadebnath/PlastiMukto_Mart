@@ -23,7 +23,21 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 }
 
 export function generateToken(payload: UserPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  try {
+    console.log('JWT_SECRET exists:', !!JWT_SECRET);
+    console.log('JWT_SECRET length:', JWT_SECRET.length);
+    
+    if (!JWT_SECRET || JWT_SECRET === 'your-secret-key') {
+      console.warn('Using default JWT_SECRET - this is not secure for production!');
+    }
+    
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    console.log('Token generated successfully, length:', token.length);
+    return token;
+  } catch (error) {
+    console.error('Token generation error:', error);
+    throw new Error('Failed to generate JWT token');
+  }
 }
 
 export function verifyToken(token: string): UserPayload | null {
@@ -46,9 +60,13 @@ export function getTokenFromRequest(request: NextRequest): string | null {
 }
 
 export function setAuthCookie(token: string): string {
-  return `auth-token=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${7 * 24 * 60 * 60}`;
+  const isProduction = process.env.NODE_ENV === 'production';
+  const cookieString = `auth-token=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${7 * 24 * 60 * 60}${isProduction ? '; Secure' : ''}`;
+  console.log('Cookie string created:', cookieString.substring(0, 50) + '...');
+  return cookieString;
 }
 
 export function clearAuthCookie(): string {
-  return 'auth-token=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0';
+  const isProduction = process.env.NODE_ENV === 'production';
+  return `auth-token=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0${isProduction ? '; Secure' : ''}`;
 }
