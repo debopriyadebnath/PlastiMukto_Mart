@@ -1,12 +1,13 @@
+
 'use client'
 
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Card, CardContent } from '@/components/ui/card'
-import { DirectAnalysisResult, ImageInfo } from '@/types/waste-analysis'
+import { WasteAnalysis } from '@/types/waste-analysis'
 
 interface ImageUploaderProps {
-  onAnalysisComplete: (analysis: DirectAnalysisResult, imageInfo: ImageInfo) => void
+  onAnalysisComplete: (analysis: WasteAnalysis, imageInfo: undefined) => void
 }
 
 export default function ImageUploader({ onAnalysisComplete }: ImageUploaderProps) {
@@ -58,12 +59,7 @@ export default function ImageUploader({ onAnalysisComplete }: ImageUploaderProps
       const data = await response.json()
 
       if (data.success) {
-        onAnalysisComplete(data.analysis, {
-          fileName: file.name,
-          fileSize: file.size,
-          mimeType: file.type,
-          imageData: imageData
-        })
+        onAnalysisComplete(data.analysis, data.imageInfo)
       } else {
         setError(data.message || 'Analysis failed')
         setPreview(null)
