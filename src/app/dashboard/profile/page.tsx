@@ -16,6 +16,21 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [userImages, setUserImages] = useState<any[]>([]);
+  const [loadingImages, setLoadingImages] = useState(true);
+  // Fetch user's uploaded images
+  useEffect(() => {
+    if (user) {
+      fetch('/api/waste-analysis/history?userId=' + user.id)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setUserImages(data.analyses);
+          }
+        })
+        .finally(() => setLoadingImages(false));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -98,6 +113,45 @@ export default function ProfilePage() {
           <p className="text-gray-600">
             Analyze waste items and track your environmental impact
           </p>
+        </div>
+
+        {/* Uploaded Images Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Uploaded Waste Images</h2>
+          {loadingImages ? (
+            <div className="text-center text-gray-600">Loading images...</div>
+          ) : userImages.length === 0 ? (
+            <div className="text-center text-gray-600">No images uploaded yet.</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userImages.map(img => (
+                <div key={img.id} className="bg-white rounded-lg shadow p-4">
+                  <img src={img.imageUrl} alt={img.imageName} className="w-full h-48 object-cover rounded mb-2" />
+                  <div className="font-semibold text-lg text-gray-900 mb-1">{img.imageName}</div>
+                  <div className="text-sm text-gray-600 mb-1">Size: {img.imageSize} bytes</div>
+                  <div className="text-sm text-gray-600 mb-1">Type: {img.mimeType}</div>
+                  <div className="text-sm text-gray-600 mb-1">Status: {img.status}</div>
+                  {img.confidence && (
+                    <div className="text-sm text-green-700 mb-1">Confidence: {Math.round(img.confidence * 100)}%</div>
+                  )}
+                  <div className="text-xs text-gray-500">Uploaded: {new Date(img.createdAt).toLocaleString()}</div>
+                  {img.detectedItems && img.detectedItems.length > 0 && (
+                    <div className="mt-2">
+                      <div className="font-medium text-gray-800 mb-1">Detected Items:</div>
+                      <ul className="list-disc ml-5 text-sm">
+                        {img.detectedItems.map((item: any, idx: number) => (
+                          <><li key={idx} className='text-black'>{item.name} ({item.category})</li><h1>{item.description}</h1></>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {img.errorMessage && (
+                    <div className="text-xs text-red-600 mt-2">Error: {img.errorMessage}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* User Info & Stats */}
