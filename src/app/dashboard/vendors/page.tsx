@@ -15,14 +15,20 @@ const vendors = [
 			{
 				name: "Cloth Bag",
 				img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=100&q=80",
+				quantity: 120,
+				price: "25 tokens",
 			},
 			{
 				name: "Bamboo Bottle",
 				img: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=100&q=80",
+				quantity: 80,
+				price: "40 tokens",
 			},
 			{
 				name: "Recycled Craft",
 				img: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=100&q=80",
+				quantity: 60,
+				price: "30 tokens",
 			},
 		],
 	},
@@ -36,10 +42,14 @@ const vendors = [
 			{
 				name: "Reusable Straw",
 				img: "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=100&q=80",
+				quantity: 200,
+				price: "10 tokens",
 			},
 			{
 				name: "Plantable Pencil",
 				img: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=100&q=80",
+				quantity: 150,
+				price: "8 tokens",
 			},
 		],
 	},
@@ -53,10 +63,14 @@ const vendors = [
 			{
 				name: "Recycled Notebook",
 				img: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=100&q=80",
+				quantity: 90,
+				price: "12 tokens",
 			},
 			{
 				name: "Eco Basket",
 				img: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=100&q=80",
+				quantity: 40,
+				price: "35 tokens",
 			},
 		],
 	},
@@ -139,7 +153,7 @@ export default function VendorsDashboard() {
 							{vendor.products.map((product, idx) => (
 								<div
 									key={idx}
-									className="flex flex-col items-center bg-green-950 rounded-xl p-2 shadow border border-green-700"
+									className="flex flex-col items-center bg-green-950 rounded-xl p-2 shadow border border-green-700 min-w-[110px]"
 								>
 									<div className="relative w-14 h-14 mb-1">
 										<Image
@@ -151,8 +165,14 @@ export default function VendorsDashboard() {
 											priority
 										/>
 									</div>
-									<span className="text-xs text-green-200">
+									<span className="text-xs text-green-200 font-semibold">
 										{product.name}
+									</span>
+									<span className="text-xs text-orange-400 mt-1">
+										Qty: {product.quantity}
+									</span>
+									<span className="text-xs text-green-400 mt-1">
+										Pays: {product.price}
 									</span>
 								</div>
 							))}
