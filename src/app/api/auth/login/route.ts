@@ -7,9 +7,7 @@ export async function POST(request: NextRequest) {
     console.log('Login request received');
     
     const { email, password } = await request.json();
-    console.log('Login data:', { email, password: '***' });
-
-    // Validation
+    console.log('Login data:', { email, password: '***' })
     if (!email || !password) {
       return NextResponse.json(
         { message: 'Email and password are required' },
