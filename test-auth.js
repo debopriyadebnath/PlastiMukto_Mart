@@ -60,3 +60,4 @@ const testLogin = async () => {
 
 // Run tests
 testRegistration().then(() => testLogin());
+
