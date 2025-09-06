@@ -33,7 +33,7 @@ const Login = () => {
       } else {
         setError(result.message || 'Login failed');
       }
-    } catch (err: unknown) {
+    } catch {
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -105,7 +105,7 @@ const Login = () => {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              Do not have an account?{' '}
               <Link href="/auth/register" className="font-medium text-green-600 hover:text-green-500">
                 Create one here
               </Link>

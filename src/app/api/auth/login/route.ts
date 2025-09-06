@@ -4,7 +4,10 @@ import { verifyPassword, generateToken, setAuthCookie } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Login request received');
+    
     const { email, password } = await request.json();
+    console.log('Login data:', { email, password: '***' });
 
     // Validation
     if (!email || !password) {
@@ -15,11 +18,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user
+    console.log('Finding user...');
     const user = await prisma.user.findUnique({
       where: { email }
     });
 
     if (!user) {
+      console.log('User not found');
       return NextResponse.json(
         { message: 'Invalid email or password' },
         { status: 401 }
@@ -27,9 +32,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
+    console.log('Verifying password...');
     const isValidPassword = await verifyPassword(password, user.password);
 
     if (!isValidPassword) {
+      console.log('Invalid password');
       return NextResponse.json(
         { message: 'Invalid email or password' },
         { status: 401 }
@@ -37,6 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
+    console.log('Generating JWT token...');
     const token = generateToken({
       id: user.id,
       email: user.email,

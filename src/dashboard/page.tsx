@@ -3,7 +3,7 @@ import { FaHome, FaGift, FaUsers, FaUser, FaCamera, FaMapMarkedAlt } from 'react
 import { MdLeaderboard } from 'react-icons/md';
 import Image from 'next/image';
 
-// Top header component
+
 function DashboardHeader() {
   return (
     <header className="w-full flex items-center justify-between bg-black shadow-sm px-8 py-4 mb-6">
