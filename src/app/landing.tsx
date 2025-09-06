@@ -14,10 +14,7 @@ export default function LandingPage() {
       {/* Navbar */}
   <nav className="flex items-center justify-between px-8 py-6 bg-black/80 shadow-lg rounded-b-2xl border-b-4 border-orange-500">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-green-500 shadow-lg">
-            {/* Logo SVG */}
-            <svg width="28" height="28" fill="none" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#22C55E"/><path d="M8 14l6-6 6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M8 18h12" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
-          </span>
+          <img src="/logo.png" alt="PlastiMukto Mart Logo" className="w-10 h-10 rounded-full border-2 border-green-500 shadow-lg" />
           <span className="ml-2 text-xl font-bold text-orange-400 drop-shadow">PlastiMukto Mart</span>
         </div>
         <div className="hidden md:flex gap-8 text-orange-400 font-semibold">

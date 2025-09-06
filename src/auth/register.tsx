@@ -19,7 +19,7 @@ const Register = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError(''); // Clear error when user starts typing
+    setError(''); 
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
