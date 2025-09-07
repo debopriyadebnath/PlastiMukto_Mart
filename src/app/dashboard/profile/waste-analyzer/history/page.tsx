@@ -30,23 +30,27 @@ export default function AnalysisHistoryPage() {
     if (user) {
       fetchAnalyses()
     }
-  }, [user, loading, pagination.page])
+  // FIX: guard against undefined pagination
+  }, [user, loading, pagination?.page])
 
   const fetchAnalyses = async () => {
     try {
       setLoadingAnalyses(true)
       const response = await fetch(
-        `/api/waste-analysis/history?page=${pagination.page}&limit=${pagination.limit}`,
-        {
-          credentials: 'include'
-        }
+        `/api/waste-analysis/history?page=${pagination?.page ?? 1}&limit=${pagination?.limit ?? 10}`,
+        { credentials: 'include' }
       )
 
       const data = await response.json()
 
       if (data.success) {
-        setAnalyses(data.analyses)
-        setPagination(data.pagination)
+        // Guard analyses array shape
+        const safeAnalyses = Array.isArray(data.analyses) ? data.analyses : []
+        setAnalyses(safeAnalyses)
+        // FIX: only update if pagination exists; preserve previous defaults
+        if (data.pagination && typeof data.pagination === 'object') {
+          setPagination(prev => ({ ...prev, ...data.pagination }))
+        }
       } else {
         setError(data.message || 'Failed to load analysis history')
       }
@@ -139,7 +143,7 @@ export default function AnalysisHistoryPage() {
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="text-2xl font-bold text-green-600">
-                  {analyses.reduce((sum, analysis) => sum + analysis.detectedItems.length, 0)}
+                  {analyses.reduce((sum, analysis) => sum + (analysis.detectedItems?.length || 0), 0)}
                 </div>
                 <div className="text-sm text-gray-600">Items Analyzed</div>
               </CardContent>
@@ -147,7 +151,7 @@ export default function AnalysisHistoryPage() {
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="text-2xl font-bold text-purple-600">
-                  {analyses.reduce((sum, analysis) => sum + analysis.detectedItems.length * 10, 0)}
+                  {analyses.reduce((sum, analysis) => sum + (analysis.detectedItems?.length || 0) * 10, 0)}
                 </div>
                 <div className="text-sm text-gray-600">Points Earned</div>
               </CardContent>
@@ -155,7 +159,7 @@ export default function AnalysisHistoryPage() {
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="text-2xl font-bold text-orange-600">
-                  {new Set(analyses.flatMap(analysis => analysis.detectedItems.map((item: any) => item.category))).size}
+                  {new Set(analyses.flatMap(analysis => (analysis.detectedItems || []).map((item: any) => item.category))).size}
                 </div>
                 <div className="text-sm text-gray-600">Categories Found</div>
               </CardContent>
