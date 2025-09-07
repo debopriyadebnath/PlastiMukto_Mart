@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTokenFromRequest, verifyToken } from '@/lib/auth'
 import { analyzeWasteImage, validateAnalysisResult } from '@/lib/gemini/analysis'
 import prisma from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
+// Note: Prisma JSON fields accept plain JS objects; cast to any to satisfy TS here.
 
 export async function POST(request: NextRequest) {
   try {
@@ -96,11 +96,11 @@ export async function POST(request: NextRequest) {
       where: { id: analysisId },
       data: {
         status: 'completed',
-    // Cast complex objects to Prisma JSON types
-    rawGeminiResponse: (analysisResult as unknown) as Prisma.InputJsonValue,
-    lifecycleInfo: (analysisResult.detectedItems.map(item => item.lifecycleInfo) as unknown) as Prisma.InputJsonValue,
-    recyclingOptions: (analysisResult.detectedItems.map(item => item.recyclingOptions) as unknown) as Prisma.InputJsonValue,
-    reuseIdeas: (analysisResult.detectedItems.map(item => item.reuseIdeas) as unknown) as Prisma.InputJsonValue,
+    // Store complex objects into JSON fields
+    rawGeminiResponse: analysisResult as any,
+    lifecycleInfo: analysisResult.detectedItems.map(item => item.lifecycleInfo) as any,
+    recyclingOptions: analysisResult.detectedItems.map(item => item.recyclingOptions) as any,
+    reuseIdeas: analysisResult.detectedItems.map(item => item.reuseIdeas) as any,
         confidence: analysisResult.overallConfidence,
         completedAt: new Date()
       },
