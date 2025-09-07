@@ -4,10 +4,11 @@ import prisma from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { analysisId: string } }
+  context: { params: Promise<{ analysisId: string }> }
 ) {
   try {
-    console.log('Getting analysis results for:', params.analysisId)
+    const { analysisId } = await context.params
+    console.log('Getting analysis results for:', analysisId)
     
     // Verify authentication
     const token = getTokenFromRequest(request)
@@ -27,9 +28,9 @@ export async function GET(
     }
 
     // Get the analysis with detected items
-    const analysis = await prisma.wasteAnalysis.findFirst({
+  const analysis = await prisma.wasteAnalysis.findFirst({
       where: {
-        id: params.analysisId,
+    id: analysisId,
         userId: payload.id
       },
       include: {

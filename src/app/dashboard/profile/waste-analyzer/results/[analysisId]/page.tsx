@@ -2,20 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import AnalysisResults from '@/components/waste-analysis/AnalysisResults'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { WasteAnalysis } from '@/types/waste-analysis'
 
-interface ResultsPageProps {
-  params: {
-    analysisId: string
-  }
-}
-
-export default function ResultsPage({ params }: ResultsPageProps) {
+export default function ResultsPage(_props: { params: Promise<{ analysisId: string }> }) {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const routeParams = useParams()
+  const analysisId = (routeParams?.analysisId as string) || ''
   const [analysis, setAnalysis] = useState<WasteAnalysis | null>(null)
   const [loadingAnalysis, setLoadingAnalysis] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -29,12 +25,13 @@ export default function ResultsPage({ params }: ResultsPageProps) {
     if (user) {
       fetchAnalysis()
     }
-  }, [user, loading, params.analysisId])
+  }, [user, loading, analysisId])
 
   const fetchAnalysis = async () => {
     try {
       setLoadingAnalysis(true)
-      const response = await fetch(`/api/waste-analysis/results/${params.analysisId}`, {
+  if (!analysisId) return
+  const response = await fetch(`/api/waste-analysis/results/${analysisId}`, {
         credentials: 'include'
       })
 

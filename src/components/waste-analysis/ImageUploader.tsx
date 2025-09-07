@@ -6,10 +6,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { DirectAnalysisResult, ImageInfo } from '@/types/waste-analysis'
 
 interface ImageUploaderProps {
-  onAnalysisComplete: (analysis: DirectAnalysisResult, imageInfo: ImageInfo) => void
+  onAnalysisComplete?: (analysis: DirectAnalysisResult, imageInfo: ImageInfo) => void
+  onUploadSuccess?: (analysisId: string) => void
 }
 
-export default function ImageUploader({ onAnalysisComplete }: ImageUploaderProps) {
+export default function ImageUploader({ onAnalysisComplete, onUploadSuccess }: ImageUploaderProps) {
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -37,37 +38,51 @@ export default function ImageUploader({ onAnalysisComplete }: ImageUploaderProps
       const previewUrl = URL.createObjectURL(file)
       setPreview(previewUrl)
 
-      // Convert to base64
-      const imageData = await convertToBase64(file)
-
-      // Analyze directly
-      const response = await fetch('/api/waste-analysis/analyze-direct', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          imageData,
-          fileName: file.name,
-          fileSize: file.size,
-          mimeType: file.type
-        }),
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        onAnalysisComplete(data.analysis, {
-          fileName: file.name,
-          fileSize: file.size,
-          mimeType: file.type,
-          imageData: imageData
+      if (onUploadSuccess) {
+        const formData = new FormData()
+        formData.append('image', file)
+        const response = await fetch('/api/waste-analysis/upload', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
         })
-      } else {
-        setError(data.message || 'Analysis failed')
-        setPreview(null)
-        setImageFile(null)
+        const data = await response.json()
+        if (data.success && data.analysisId) {
+          onUploadSuccess(data.analysisId)
+        } else {
+          setError(data.message || 'Upload failed')
+          setPreview(null)
+          setImageFile(null)
+        }
+      } else if (onAnalysisComplete) {
+        // Convert to base64 and analyze directly
+        const imageData = await convertToBase64(file)
+        const response = await fetch('/api/waste-analysis/analyze-direct', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            imageData,
+            fileName: file.name,
+            fileSize: file.size,
+            mimeType: file.type
+          }),
+        })
+        const data = await response.json()
+        if (data.success) {
+          onAnalysisComplete(data.analysis, {
+            fileName: file.name,
+            fileSize: file.size,
+            mimeType: file.type,
+            imageData: imageData
+          })
+        } else {
+          setError(data.message || 'Analysis failed')
+          setPreview(null)
+          setImageFile(null)
+        }
       }
     } catch (err) {
       console.error('Analysis error:', err)
@@ -77,7 +92,7 @@ export default function ImageUploader({ onAnalysisComplete }: ImageUploaderProps
     } finally {
       setAnalyzing(false)
     }
-  }, [onAnalysisComplete])
+  }, [onAnalysisComplete, onUploadSuccess])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
