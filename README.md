@@ -97,9 +97,11 @@ scripts/          # Setup and seed scripts
 
 
 ## Team & Credits
-- *Team Name:* PlastiMukto
-- *Members:* Debopriya Debnath (add more as needed)
-- *Contact:* [your-email@example.com]
+- ## Team & Credits
+- *Team Name:* Dev Nexus Spectra
+- *Members:* Debopriya Debnath 
+- *Members:* Anirban Ghosh 
+- *Contact:* [debopriyadebnath121@gmail.com] & [anirbanghosh060@gmail.com]
 
 ## Judging Criteria Highlights
 - *Innovation:* AI-powered waste analysis and gamified bounties.
