@@ -43,9 +43,6 @@ export default function CommunityDashboard() {
       <div className="absolute top-6 left-6 opacity-20 pointer-events-none">
         <FaRecycle className="text-green-400 text-6xl" />
       </div>
-      <div className="absolute bottom-8 right-8 opacity-25 pointer-events-none">
-        <FaLeaf className="text-pink-400 text-7xl" />
-      </div>
 
       {/* Header */}
       <div className="text-center mb-12">

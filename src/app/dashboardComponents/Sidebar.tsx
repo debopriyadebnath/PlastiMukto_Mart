@@ -62,7 +62,7 @@ const Sidebar = () => {
       {/* Footer Branding */}
       <span className="flex flex-col mt-10 text-center">
         <span className="text-2xl font-extrabold text-pink-600 drop-shadow-md tracking-wide">
-          PlastiMukti Mart
+          PlastiMukto Mart
         </span>
         <span className="text-xs text-green-500 font-semibold italic tracking-widest">
           (Plastic-Free Marketplace)
