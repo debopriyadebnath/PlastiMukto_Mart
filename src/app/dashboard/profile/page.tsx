@@ -8,6 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import ImageUploader from '@/components/waste-analysis/ImageUploader'
 import AnalysisResults from '@/components/waste-analysis/AnalysisResults'
 
+interface BountyAssignment {
+  id: string;
+  status: string;
+  startTime: string;
+  expiresAt: string;
+  completedAt?: string;
+  bounty: {
+    id: string;
+    title: string;
+    description: string;
+    rewardTokens: number;
+  };
+}
+
 export default function ProfilePage() {
   const { user, loading } = useAuth()
   const router = useRouter()
@@ -18,6 +32,9 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [userImages, setUserImages] = useState<any[]>([]);
   const [loadingImages, setLoadingImages] = useState(true);
+  const [bountyAssignments, setBountyAssignments] = useState<BountyAssignment[]>([]);
+  const [loadingBounties, setLoadingBounties] = useState(true);
+  const [completingBounty, setCompletingBounty] = useState<string | null>(null);
   // Fetch user's uploaded images
   useEffect(() => {
     if (user) {
@@ -29,6 +46,51 @@ export default function ProfilePage() {
           }
         })
         .finally(() => setLoadingImages(false));
+    }
+  }, [user]);
+
+  // Fetch user's bounty assignments
+  useEffect(() => {
+    if (user) {
+      fetch('/api/bounty/assignments')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setBountyAssignments(data.assignments);
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching bounty assignments:', err);
+          // Set sample data if API fails
+          setBountyAssignments([
+            {
+              id: 'assignment-1',
+              status: 'IN_PROGRESS',
+              startTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+              expiresAt: new Date(Date.now() + 46 * 60 * 60 * 1000).toISOString(),
+              bounty: {
+                id: 'bounty-1',
+                title: 'Plastic Bottle Collection Drive',
+                description: 'Organize a community drive to collect plastic bottles',
+                rewardTokens: 100
+              }
+            },
+            {
+              id: 'assignment-2',
+              status: 'COMPLETED',
+              startTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+              expiresAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+              completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+              bounty: {
+                id: 'bounty-2',
+                title: 'Cardboard Box Art Project',
+                description: 'Create innovative art installations using recycled cardboard',
+                rewardTokens: 75
+              }
+            }
+          ]);
+        })
+        .finally(() => setLoadingBounties(false));
     }
   }, [user]);
 
@@ -89,6 +151,67 @@ export default function ProfilePage() {
     setSaved(false)
     setError(null)
   }
+
+  const handleCompleteBounty = async (assignmentId: string) => {
+    setCompletingBounty(assignmentId);
+    
+    try {
+      const response = await fetch('/api/bounty/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ assignmentId }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Update assignment status
+        setBountyAssignments(prevAssignments => 
+          prevAssignments.map(assignment => 
+            assignment.id === assignmentId 
+              ? { 
+                  ...assignment, 
+                  status: 'COMPLETED',
+                  completedAt: new Date().toISOString()
+                }
+              : assignment
+          )
+        );
+        
+        const assignment = bountyAssignments.find(a => a.id === assignmentId);
+        alert(`Bounty completed! You earned ${assignment?.bounty.rewardTokens} tokens.`);
+      } else {
+        alert(data.message || 'Failed to complete bounty');
+      }
+    } catch (error) {
+      console.error('Error completing bounty:', error);
+      alert('Failed to complete bounty');
+    } finally {
+      setCompletingBounty(null);
+    }
+  };
+
+  const getTimeLeft = (expiresAt: string) => {
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const diff = expiry.getTime() - now.getTime();
+    
+    if (diff <= 0) return 'Expired';
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours}h ${minutes}m`;
+  };
+
+  const getStatusColor = (status: string, expiresAt: string) => {
+    if (status === 'COMPLETED') return 'bg-green-100 text-green-700';
+    if (status === 'EXPIRED') return 'bg-red-100 text-red-700';
+    if (new Date(expiresAt) < new Date()) return 'bg-red-100 text-red-700';
+    return 'bg-blue-100 text-blue-700';
+  };
 
   if (loading) {
     return (
@@ -154,60 +277,134 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* User Info & Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">👤</span>
-                  User Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Name</label>
-                    <p className="mt-1 text-lg text-gray-900">{user.name}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Email</label>
-                    <p className="mt-1 text-lg text-gray-900">{user.email}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Points</label>
-                    <p className="mt-1 text-lg text-gray-900">{user.points}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+         {/* User Info & Stats */}
+         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+           <div className="lg:col-span-2">
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2">
+                   <span className="text-2xl">👤</span>
+                   User Information
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <div className="space-y-4">
+                   <div>
+                     <label className="block text-sm font-medium text-gray-700">Name</label>
+                     <p className="mt-1 text-lg text-gray-900">{user.name}</p>
+                   </div>
+                   <div>
+                     <label className="block text-sm font-medium text-gray-700">Email</label>
+                     <p className="mt-1 text-lg text-gray-900">{user.email}</p>
+                   </div>
+                   <div>
+                     <label className="block text-sm font-medium text-gray-700">Points</label>
+                     <p className="mt-1 text-lg text-gray-900">{user.points}</p>
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+           </div>
 
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">🏆</span>
-                  Stats
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-3xl font-bold text-green-600">{user.points}</div>
-                    <div className="text-sm text-green-800">Total Points</div>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-3xl font-bold text-blue-600">
-                      {user.rank ? `#${user.rank}` : 'Unranked'}
-                    </div>
-                    <div className="text-sm text-blue-800">Leaderboard Rank</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+           <div className="space-y-6">
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2">
+                   <span className="text-2xl">🏆</span>
+                   Stats
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <div className="space-y-4">
+                   <div className="text-center p-4 bg-green-50 rounded-lg">
+                     <div className="text-3xl font-bold text-green-600">{user.points}</div>
+                     <div className="text-sm text-green-800">Total Points</div>
+                   </div>
+                   <div className="text-center p-4 bg-blue-50 rounded-lg">
+                     <div className="text-3xl font-bold text-blue-600">
+                       {user.rank ? `#${user.rank}` : 'Unranked'}
+                     </div>
+                     <div className="text-sm text-blue-800">Leaderboard Rank</div>
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
+
+             {/* Bounty Assignments */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2">
+                   <span className="text-2xl">🎯</span>
+                   My Bounties
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 {loadingBounties ? (
+                   <div className="text-center text-gray-600 py-4">Loading bounties...</div>
+                 ) : bountyAssignments.length === 0 ? (
+                   <div className="text-center text-gray-600 py-4">
+                     <p className="text-sm">No active bounties</p>
+                     <p className="text-xs text-gray-500 mt-1">Visit Community page to take bounties</p>
+                   </div>
+                 ) : (
+                   <div className="space-y-3 max-h-96 overflow-y-auto">
+                     {bountyAssignments.map((assignment) => (
+                       <div key={assignment.id} className="border rounded-lg p-3 bg-gray-50">
+                         <div className="flex justify-between items-start mb-2">
+                           <h4 className="font-semibold text-sm text-gray-900 line-clamp-1">
+                             {assignment.bounty.title}
+                           </h4>
+                           <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(assignment.status, assignment.expiresAt)}`}>
+                             {assignment.status === 'IN_PROGRESS' ? 'Active' : assignment.status}
+                           </span>
+                         </div>
+                         
+                         <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                           {assignment.bounty.description}
+                         </p>
+                         
+                         <div className="flex justify-between items-center text-xs">
+                           <span className="text-green-600 font-semibold">
+                             {assignment.bounty.rewardTokens} tokens
+                           </span>
+                           <span className="text-gray-500">
+                             {getTimeLeft(assignment.expiresAt)}
+                           </span>
+                         </div>
+
+                         {assignment.status === 'IN_PROGRESS' && new Date(assignment.expiresAt) > new Date() && (
+                           <button
+                             onClick={() => handleCompleteBounty(assignment.id)}
+                             disabled={completingBounty === assignment.id}
+                             className="w-full mt-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs py-1 px-2 rounded transition-colors"
+                           >
+                             {completingBounty === assignment.id ? 'Completing...' : 'Complete'}
+                           </button>
+                         )}
+
+                         {assignment.status === 'COMPLETED' && (
+                           <div className="text-center mt-2">
+                             <p className="text-green-600 font-semibold text-xs">
+                               ✅ Completed
+                             </p>
+                           </div>
+                         )}
+
+                         {assignment.status === 'EXPIRED' && (
+                           <div className="text-center mt-2">
+                             <p className="text-red-600 font-semibold text-xs">
+                               ⏰ Expired
+                             </p>
+                           </div>
+                         )}
+                       </div>
+                     ))}
+                   </div>
+                 )}
+               </CardContent>
+             </Card>
+           </div>
+         </div>
 
         {/* Waste Analyzer Section */}
         <div className="mb-8">

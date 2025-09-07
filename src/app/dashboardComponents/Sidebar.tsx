@@ -46,10 +46,10 @@ const Sidebar = () => {
           <span>🏪</span> Connect Vendors
         </button>
         <button
-          onClick={() => router.push('/dashboard/gesture')}
+          onClick={() => router.push('/dashboard/leaderboard')}
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-green-600 font-semibold bg-white hover:bg-pink-200 hover:text-pink-900 transition shadow-sm"
         >
-          <span>🤳</span> Gesture Control
+          <span>🤳</span> leaderboard
         </button>
         <button
           onClick={() => router.push('/dashboard/profile')}
