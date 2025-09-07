@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DetectedWasteItem } from '@/types/waste-analysis'
 
@@ -9,6 +10,10 @@ interface ReuseIdeasProps {
 }
 
 export default function ReuseIdeas({ reuseIdeas, detectedItems }: ReuseIdeasProps) {
+  const [genLoading, setGenLoading] = useState<Record<string, boolean>>({})
+  const [genImages, setGenImages] = useState<Record<string, string>>({})
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null)
+
   const getReuseIdeas = (item: DetectedWasteItem) => {
     const category = item.category.toLowerCase()
     const name = item.name.toLowerCase()
@@ -125,6 +130,63 @@ export default function ReuseIdeas({ reuseIdeas, detectedItems }: ReuseIdeasProp
     return ideas.slice(0, 5) // Return top 5 ideas
   }
 
+  const keyFor = (itemId: string, idea: string, index: number) => `${itemId}:${index}:${idea.slice(0,50)}`
+
+  const handleGenerate = async (idea: string, item: DetectedWasteItem, index: number) => {
+    const k = keyFor(item.id, idea, index)
+    try {
+      setGenLoading(prev => ({ ...prev, [k]: true }))
+      const res = await fetch('/api/ai/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          idea,
+          itemName: item.name,
+          itemCategory: item.category,
+          // Optional: pass material/confidence if you like
+        })
+      })
+      const data = await res.json()
+      if (data?.success && (data.imageDataUrl || data.imageUrl)) {
+        const src = data.imageDataUrl || data.imageUrl
+        setGenImages(prev => ({ ...prev, [k]: src }))
+      }
+    } catch (e) {
+      // no-op; could set error state
+    } finally {
+      setGenLoading(prev => ({ ...prev, [k]: false }))
+    }
+  }
+
+  const downloadImage = async (src: string, filename = 'reuse-idea.png') => {
+    try {
+      // If it's already a data URL, just trigger download
+      if (src.startsWith('data:')) {
+        const a = document.createElement('a')
+        a.href = src
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        return
+      }
+      // Otherwise fetch and blob it for cross-origin safety
+      const resp = await fetch(src)
+      const blob = await resp.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      // Optional: surface an error toast later
+      console.error('Failed to download image', err)
+    }
+  }
+
   const getDifficultyLevel = (idea: string) => {
     if (idea.includes('storage') || idea.includes('organiz')) return 'Easy'
     if (idea.includes('DIY') || idea.includes('craft')) return 'Medium'
@@ -163,6 +225,9 @@ export default function ReuseIdeas({ reuseIdeas, detectedItems }: ReuseIdeasProp
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {ideas.map((idea, index) => {
                     const difficulty = getDifficultyLevel(idea)
+                    const k = keyFor(item.id, idea, index)
+                    const generated = genImages[k]
+                    const loading = !!genLoading[k]
                     return (
                       <div key={index} className="bg-gray-50 rounded-lg p-3">
                         <div className="flex items-start justify-between mb-2">
@@ -171,10 +236,41 @@ export default function ReuseIdeas({ reuseIdeas, detectedItems }: ReuseIdeasProp
                             {difficulty}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
                           <span>💡</span>
                           <span>Reuse idea</span>
                         </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs disabled:opacity-60"
+                            disabled={loading}
+                            onClick={() => handleGenerate(idea, item, index)}
+                          >
+                            {loading ? 'Generating…' : 'Generate Image'}
+                          </button>
+                          {generated && (
+                            <>
+                              <button
+                                className="bg-gray-800 hover:bg-black text-white px-3 py-1 rounded text-xs"
+                                onClick={() => setPreviewSrc(generated)}
+                              >
+                                View
+                              </button>
+                              <button
+                                className="bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 px-3 py-1 rounded text-xs"
+                                onClick={() => downloadImage(generated, `${item.name.replace(/\s+/g,'-').toLowerCase()}-idea-${index+1}.png`)}
+                              >
+                                Download
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        {generated && (
+                          <div className="mt-3">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={generated} alt={`Generated for ${idea}`} className="w-full h-40 object-cover rounded border" />
+                          </div>
+                        )}
                       </div>
                     )
                   })}
@@ -218,6 +314,37 @@ export default function ReuseIdeas({ reuseIdeas, detectedItems }: ReuseIdeasProp
           </div>
         </div>
       </CardContent>
+      {previewSrc && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setPreviewSrc(null)}
+        >
+          <div className="relative max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="absolute -top-10 right-0 bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded text-sm"
+              onClick={() => setPreviewSrc(null)}
+            >
+              Close
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={previewSrc} alt="Generated preview" className="w-full max-h-[85vh] object-contain rounded-lg shadow-lg" />
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                className="bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 px-3 py-1 rounded text-sm"
+                onClick={() => downloadImage(previewSrc!)}
+              >
+                Download
+              </button>
+              <button
+                className="bg-gray-800 hover:bg-black text-white px-3 py-1 rounded text-sm"
+                onClick={() => setPreviewSrc(null)}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   )
 }
